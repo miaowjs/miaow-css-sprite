@@ -134,8 +134,7 @@ function addSpriteImageProp(backgroundImageList, backgroundNodeList, spriteModul
 }
 
 module.exports = function (option, cb) {
-  var file = this.file;
-  var root = postcss.parse(file.contents, {from: this.srcAbsPath});
+  var root = postcss.parse(this.contents, {from: this.srcAbsPath});
 
   async.waterfall([
     getBackgroundImageAndNodeList.bind(this, root, option),
@@ -149,7 +148,7 @@ module.exports = function (option, cb) {
       }));
     }
 
-    this.file.contents = new Buffer(root.toResult().css);
+    this.contents = new Buffer(root.toResult().css);
     cb();
   }.bind(this));
 };
