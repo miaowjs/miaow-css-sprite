@@ -1,4 +1,4 @@
-# miaow-amd-parse
+# miaow-css-sprite
 
 > Miaow的CSS自动雪碧图工具
 
