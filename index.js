@@ -11,7 +11,7 @@ function getBackgroundImageAndNodeList(root, option, cb) {
   var backgroundImageList = [];
 
   var keyword = _.isUndefined(option.keyword) ? 'sprite' : option.keyword;
-  var reg = new RegExp('url\\s*\\(\\s*[\'"]?([\\w\\_\\/\\.\\-]*)' +
+  var reg = new RegExp('url\\s*\\(\\s*[\'"]?([\\w\\_\\/\\.\\-]+)' +
     (keyword ? ('\\?' + keyword) : '') +
     '[\'\"]?\\s*\\)', 'im');
 
