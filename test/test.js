@@ -36,6 +36,10 @@ describe('miaow-css-sprite', function () {
     assert(!!parse);
   });
 
+  it('可以应对不需要雪碧图的样式', function () {
+    assert.equal(log.modules['bar.css'].hash, 'c55463805735e6c1c8587c524305103e');
+  });
+
   it('是否生成雪碧图', function () {
     assert.equal(log.modules['foo-sprite.png'].hash, '567e004eacd0399cade415582a933fb0');
   });

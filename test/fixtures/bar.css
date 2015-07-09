@@ -1,0 +1,32 @@
+.bar {
+  display: inline-block;
+  background: url(./bar.png) no-repeat left top;
+  width: 153px;
+  height: 74px;
+}
+
+.baz {
+  position: absolute;
+  top: 0;
+  left: 0;
+  background-image: url(./baz.jpg);
+  width: 237px;
+  height: 112px;
+}
+
+.bas {
+  display: block;
+  padding: 0;
+  width: 81px;
+  height: 38px;
+  background: url(./bas.gif) no-repeat;
+  background-position: left top;
+}
+
+.foo, .foo-1, .foo-2 {
+  float: left;
+  background: url(./foo.png);
+  width: 41px;
+  height: 23px;
+  color: #fff;
+}

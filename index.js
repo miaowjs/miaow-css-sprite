@@ -36,6 +36,10 @@ function getBackgroundImageAndNodeList(root, option, cb) {
     });
   });
 
+  if (backgroundImageList.length === 0) {
+    return cb('No need sprite');
+  }
+
   async.eachSeries(backgroundImageList, function (backgroundImage, cb) {
     gm(backgroundImage.src)
       .identify(function (err, data) {
@@ -141,7 +145,7 @@ module.exports = function (option, cb) {
     createSpriteImage.bind(this),
     addSpriteImageProp.bind(this)
   ], function (err) {
-    if (err) {
+    if (err && err !== 'No need sprite') {
       return cb(new mutil.PluginError(pkg.name, err, {
         fileName: this.file.path,
         showStack: true
