@@ -15,7 +15,9 @@ function getBackgroundImageAndNodeList(root, option, cb) {
     (keyword ? ('\\?' + keyword) : '') +
     '[\'\"]?\\s*\\)', 'im');
 
-  var srcAbsPath = this.srcAbsPath;
+  var srcAbsDir = path.dirname(this.srcAbsPath);
+  var cwd = this.cwd;
+  var module = this;
 
   var backgroundNodeList = _.filter(root.nodes, function (node) {
     if (node.type !== 'rule') {
@@ -23,13 +25,19 @@ function getBackgroundImageAndNodeList(root, option, cb) {
     }
 
     return _.findLast(node.nodes, function (subNode) {
+      var relativePath;
       if (
         subNode.type === 'decl' &&
         (subNode.prop === 'background' || subNode.prop === 'background-image') &&
         reg.test(subNode.value)
       ) {
+        relativePath = path.resolve(srcAbsDir, reg.exec(subNode.value)[1]);
+
+        // 添加依赖信息
+        module.dependencies.push(path.relative(cwd, relativePath));
+
         backgroundImageList.push({
-          src: path.resolve(path.dirname(srcAbsPath), reg.exec(subNode.value)[1])
+          src: relativePath
         });
         return true;
       }

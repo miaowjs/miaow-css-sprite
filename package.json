@@ -21,7 +21,7 @@
     "postcss": "~4.1.11"
   },
   "devDependencies": {
-    "miaow": "~1.1.0",
+    "miaow": "^1.8.0",
     "mocha": "^2.2.4"
   },
   "engines": {

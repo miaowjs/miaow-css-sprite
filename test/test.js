@@ -43,4 +43,13 @@ describe('miaow-css-sprite', function () {
   it('是否生成雪碧图', function () {
     assert.equal(log.modules['foo-sprite.png'].hash, '567e004eacd0399cade415582a933fb0');
   });
+
+  it('是否添加依赖信息', function () {
+    var dependencies = log.modules['foo.css'].dependencies;
+
+    assert.equal(dependencies[0], 'bar.png');
+    assert.equal(dependencies[1], 'baz.jpg');
+    assert.equal(dependencies[2], 'bas.gif');
+    assert.equal(dependencies[3], 'foo.png');
+  });
 });
