@@ -12,7 +12,7 @@ function getBackgroundImageAndNodeList(root, option, cb) {
 
   var keyword = _.isUndefined(option.keyword) ? 'sprite' : option.keyword;
   var reg = new RegExp('url\\s*\\(\\s*[\'"]?([\\w\\_\\/\\.\\-]+)' +
-    (keyword ? ('\\?' + keyword) : '') +
+    (keyword ? ('\\#' + keyword) : '') +
     '[\'\"]?\\s*\\)', 'im');
 
   var srcAbsDir = path.dirname(this.srcAbsPath);

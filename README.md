@@ -5,7 +5,7 @@
 ```css
 .bar {
   display: inline-block;
-  background: url(./bar.png?sprite) no-repeat left top;
+  background: url(./bar.png#sprite) no-repeat left top;
   width: 153px;
   height: 74px;
 }
@@ -14,7 +14,7 @@
   position: absolute;
   top: 0;
   left: 0;
-  background-image: url(./baz.jpg?sprite);
+  background-image: url(./baz.jpg#sprite);
   width: 237px;
   height: 112px;
 }
@@ -22,7 +22,7 @@
 /* 处理后 */
 .bar {
   display: inline-block;
-  background: url(./bar.png?sprite) no-repeat left top;
+  background: url(./bar.png#sprite) no-repeat left top;
   width: 153px;
   height: 74px;
   /* 以下内容由 miaow-css-sprite 生成 */
@@ -34,7 +34,7 @@
   position: absolute;
   top: 0;
   left: 0;
-  background-image: url(./baz.jpg?sprite);
+  background-image: url(./baz.jpg#sprite);
   width: 237px;
   height: 112px;
   /* 以下内容由 miaow-css-sprite 生成 */
