@@ -145,7 +145,7 @@ function addSpriteImageProp(backgroundImageList, backgroundNodeList, spriteModul
   cb();
 }
 
-module.exports = function (option, cb) {
+function sprite(option, cb) {
   var root = postcss.parse(this.contents, {from: this.srcAbsPath});
 
   async.waterfall([
@@ -163,4 +163,6 @@ module.exports = function (option, cb) {
     this.contents = new Buffer(root.toResult().css);
     cb();
   }.bind(this));
-};
+}
+
+module.exports = mutil.plugin(pkg.name, pkg.version, sprite);
