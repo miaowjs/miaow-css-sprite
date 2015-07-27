@@ -99,7 +99,7 @@ function createSpriteImage(option, backgroundImageList, backgroundNodeList, cb) 
 
   var imagePath = path.join(
     path.dirname(this.srcAbsPath),
-    path.parse(this.srcPath).name + '-sprite.png'
+    path.basename(this.srcPath, path.extname(this.srcPath)) + '-sprite.png'
   );
 
   //生成文件
