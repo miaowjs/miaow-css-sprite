@@ -1,6 +1,6 @@
 .bar {
   display: inline-block;
-  background: url(./bar.png#sprite) no-repeat left top;
+  background: url(./img/bar.png#sprite) no-repeat left top;
   width: 153px;
   height: 74px;
 }
@@ -9,7 +9,7 @@
   position: absolute;
   top: 0;
   left: 0;
-  background-image: url(./baz.jpg#sprite);
+  background-image: url(./img/baz.jpg#sprite);
   width: 237px;
   height: 112px;
 }
@@ -19,13 +19,13 @@
   padding: 0;
   width: 81px;
   height: 38px;
-  background: url(./bas.gif#sprite) no-repeat;
+  background: url(./img/bas.gif#sprite) no-repeat;
   background-position: left top;
 }
 
 .foo, .foo-1, .foo-2 {
   float: left;
-  background: url(./foo.png#sprite);
+  background: url(./img/foo.png#sprite);
   width: 41px;
   height: 23px;
   color: #fff;

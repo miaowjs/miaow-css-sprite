@@ -37,7 +37,7 @@ describe('miaow-css-sprite', function () {
   });
 
   it('可以应对不需要雪碧图的样式', function () {
-    assert.equal(log.modules['bar.css'].hash, 'c55463805735e6c1c8587c524305103e');
+    assert.equal(log.modules['bar.css'].hash, 'a8d89002f2239aa15e26cb50d0038fc3');
   });
 
   it('是否生成雪碧图', function () {
@@ -47,9 +47,9 @@ describe('miaow-css-sprite', function () {
   it('是否添加依赖信息', function () {
     var dependencies = log.modules['foo.css'].dependencies;
 
-    assert.equal(dependencies[0], 'bar.png');
-    assert.equal(dependencies[1], 'baz.jpg');
-    assert.equal(dependencies[2], 'bas.gif');
-    assert.equal(dependencies[3], 'foo.png');
+    assert.equal(dependencies[0], 'img/bar.png');
+    assert.equal(dependencies[1], 'img/baz.jpg');
+    assert.equal(dependencies[2], 'img/bas.gif');
+    assert.equal(dependencies[3], 'img/foo.png');
   });
 });

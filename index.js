@@ -34,7 +34,7 @@ function getBackgroundImageAndNodeList(root, option, cb) {
         relativePath = path.resolve(srcAbsDir, reg.exec(subNode.value)[1]);
 
         // 添加依赖信息
-        module.dependencies.push(path.relative(cwd, relativePath));
+        module.dependencies.push(mutil.relative(cwd, relativePath));
 
         backgroundImageList.push({
           src: relativePath
@@ -126,7 +126,7 @@ function addSpriteImageProp(backgroundImageList, backgroundNodeList, spriteModul
 
     //添加背景图链接
     var url = spriteModule.url ||
-      path.relative(path.dirname(this.destAbsPath), spriteModule.destAbsPathWithHash);
+      mutil.relative(path.dirname(this.destAbsPath), spriteModule.destAbsPathWithHash);
 
     backgroundNode.append({
       prop: 'background-image',
