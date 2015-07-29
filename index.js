@@ -154,7 +154,13 @@ function addSpriteImageProp(backgroundImageList, backgroundNodeList, spriteModul
 }
 
 function sprite(option, cb) {
-  var root = postcss.parse(this.contents, {from: this.srcAbsPath});
+  var contents = this.contents.toString();
+
+  if (!contents.trim()) {
+    return cb();
+  }
+
+  var root = postcss.parse(contents, {from: this.srcAbsPath});
 
   async.waterfall([
     getBackgroundImageAndNodeList.bind(this, root, option),
