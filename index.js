@@ -15,8 +15,6 @@ function getBackgroundImageAndNodeList(root, option, cb) {
     (keyword ? ('\\#' + keyword) : '') +
     '[\'\"]?\\s*\\)', 'im');
 
-  var srcAbsDir = path.dirname(this.srcAbsPath);
-  var cwd = this.cwd;
   var module = this;
 
   var backgroundNodeList = _.filter(root.nodes, function (node) {
@@ -25,19 +23,13 @@ function getBackgroundImageAndNodeList(root, option, cb) {
     }
 
     return _.findLast(node.nodes, function (subNode) {
-      var relativePath;
       if (
         subNode.type === 'decl' &&
         (subNode.prop === 'background' || subNode.prop === 'background-image') &&
         reg.test(subNode.value)
       ) {
-        relativePath = path.resolve(srcAbsDir, reg.exec(subNode.value)[1]);
-
-        // 添加依赖信息
-        module.dependencies.push(mutil.relative(cwd, relativePath));
-
         backgroundImageList.push({
-          src: relativePath
+          src: reg.exec(subNode.value)[1]
         });
         return true;
       }
@@ -49,18 +41,32 @@ function getBackgroundImageAndNodeList(root, option, cb) {
   }
 
   async.eachSeries(backgroundImageList, function (backgroundImage, cb) {
-    gm(backgroundImage.src)
-      .identify(function (err, data) {
-        if (err) {
-          return cb(err);
-        }
+    async.series([
+      function (cb) {
+        module.getModule(backgroundImage.src, function (err, backgroundModule) {
+          if (err) {
+            return cb(err);
+          }
 
-        backgroundImage.width = data.size.width;
-        backgroundImage.height = data.size.height;
-        backgroundImage.format = data.format;
+          backgroundImage.src = backgroundModule.srcAbsPath;
+          cb();
+        });
+      },
+      function (cb) {
+        gm(backgroundImage.src)
+          .identify(function (err, data) {
+            if (err) {
+              return cb(err);
+            }
 
-        cb();
-      });
+            backgroundImage.width = data.size.width;
+            backgroundImage.height = data.size.height;
+            backgroundImage.format = data.format;
+
+            cb();
+          });
+      }
+    ], cb);
   }, function (err) {
     cb(err, option, backgroundImageList, backgroundNodeList);
   });
@@ -112,7 +118,9 @@ function createSpriteImage(option, backgroundImageList, backgroundNodeList, cb) 
     this.createModule(
       imagePath,
       buffer,
-      _.partial(cb, _, backgroundImageList, backgroundNodeList, _)
+      function (err, spriteModule) {
+        cb(err, backgroundImageList, backgroundNodeList, spriteModule);
+      }
     );
   }.bind(this));
 }
@@ -155,7 +163,7 @@ function sprite(option, cb) {
   ], function (err) {
     if (err && err !== 'No need sprite') {
       return cb(new mutil.PluginError(pkg.name, err, {
-        fileName: this.file.path,
+        fileName: this.srcAbsPath,
         showStack: true
       }));
     }

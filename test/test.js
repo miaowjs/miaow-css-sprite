@@ -45,11 +45,11 @@ describe('miaow-css-sprite', function () {
   });
 
   it('是否添加依赖信息', function () {
-    var dependencies = log.modules['foo.css'].dependencies;
+    var dependList = log.modules['foo.css'].dependList;
 
-    assert.equal(dependencies[0], 'img/bar.png');
-    assert.equal(dependencies[1], 'img/baz.jpg');
-    assert.equal(dependencies[2], 'img/bas.gif');
-    assert.equal(dependencies[3], 'img/foo.png');
+    assert.equal(dependList[0], 'img/bar.png');
+    assert.equal(dependList[1], 'img/baz.jpg');
+    assert.equal(dependList[2], 'img/bas.gif');
+    assert.equal(dependList[3], 'img/foo.png');
   });
 });
