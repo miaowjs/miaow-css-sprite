@@ -1,96 +1,103 @@
 var _ = require('lodash');
 var async = require('async');
 var gm = require('gm');
-var mutil = require('miaow-util');
 var path = require('path');
 var postcss = require('postcss');
 
 var pkg = require('./package.json');
 
-function getBackgroundImageAndNodeList(root, option, cb) {
+function getBackgroundImageAndNodeList(root, options, callback) {
   var backgroundImageList = [];
 
-  var keyword = _.isUndefined(option.keyword) ? 'sprite' : option.keyword;
+  var keyword = _.isUndefined(options.keyword) ? 'sprite' : options.keyword;
   var reg = new RegExp('url\\s*\\(\\s*[\'"]?([\\w\\_\\/\\.\\-]+)' +
     (keyword ? ('\\#' + keyword) : '') +
     '[\'\"]?\\s*\\)', 'im');
 
-  var module = this;
+  var context = this;
 
-  var backgroundNodeList = _.filter(root.nodes, function (node) {
-    if (node.type !== 'rule') {
-      return;
+  var backgroundNodeList = _.filter(root.nodes, function(node) {
+    if (node.type === 'rule') {
+      return _.findLast(node.nodes, function(subNode) {
+        if (
+          subNode.type === 'decl' &&
+          (subNode.prop === 'background' || subNode.prop === 'background-image') &&
+          reg.test(subNode.value)
+        ) {
+          backgroundImageList.push({
+            src: reg.exec(subNode.value)[1]
+          });
+          return true;
+        }
+      });
     }
-
-    return _.findLast(node.nodes, function (subNode) {
-      if (
-        subNode.type === 'decl' &&
-        (subNode.prop === 'background' || subNode.prop === 'background-image') &&
-        reg.test(subNode.value)
-      ) {
-        backgroundImageList.push({
-          src: reg.exec(subNode.value)[1]
-        });
-        return true;
-      }
-    });
   });
 
   if (backgroundImageList.length === 0) {
-    return cb('No need sprite');
+    return callback('No need sprite');
   }
 
-  async.eachSeries(backgroundImageList, function (backgroundImage, cb) {
-    async.series([
-      function (cb) {
-        module.getModule(backgroundImage.src, function (err, backgroundModule) {
-          if (err) {
-            return cb(err);
-          }
-
-          backgroundImage.src = backgroundModule.srcAbsPath;
-          cb();
-        });
-      },
-      function (cb) {
-        gm(backgroundImage.src)
-          .identify(function (err, data) {
+  async.eachSeries(
+    backgroundImageList,
+    function(backgroundImage, callback) {
+      async.series([
+        function(callback) {
+          context.resolveModule(backgroundImage.src, function(err, backgroundModule) {
             if (err) {
-              return cb(err);
+              return callback(err);
             }
 
-            backgroundImage.width = data.size.width;
-            backgroundImage.height = data.size.height;
-            backgroundImage.format = data.format;
+            context.addFileDependency(backgroundModule.src);
 
-            cb();
+            backgroundImage.src = path.resolve(context.context, backgroundModule.src);
+            callback();
           });
-      }
-    ], cb);
-  }, function (err) {
-    cb(err, option, backgroundImageList, backgroundNodeList);
-  });
+        },
+
+        function(callback) {
+          gm(backgroundImage.src)
+            .identify(function(err, data) {
+              if (err) {
+                return callback(err);
+              }
+
+              backgroundImage.width = data.size.width;
+              backgroundImage.height = data.size.height;
+              backgroundImage.format = data.format;
+
+              callback();
+            });
+        }
+      ], callback);
+    },
+
+    function(err) {
+      callback(err, options, backgroundImageList, backgroundNodeList);
+    });
 }
 
-function createSpriteImage(option, backgroundImageList, backgroundNodeList, cb) {
+function createSpriteImage(options, backgroundImageList, backgroundNodeList, callback) {
+  var context = this;
   var width;
   var height;
-  var margin = _.isUndefined(option.margin) ? 10 : option.margin;
+  var margin = _.isUndefined(options.margin) ? 10 : options.margin;
 
-  width = _.max(backgroundImageList, function (backgroundImage) {
+  width = _.max(backgroundImageList, function(backgroundImage) {
     return backgroundImage.width;
   }).width;
 
-  height = _.reduce(backgroundImageList, function (total, backgroundImage) {
-      return total + backgroundImage.height;
-    }, 0) + (margin * (backgroundImageList.length - 1));
+  height = _.reduce(backgroundImageList, function(total, backgroundImage) {
+    return total + backgroundImage.height;
+  }, 0);
+
+  height += margin * (backgroundImageList.length - 1);
 
   var image = gm(width, height, 'none');
 
   var top = 0;
 
-  //绘制图片
-  _.each(backgroundImageList, function (backgroundImage) {
+  // 绘制图片
+  _.each(backgroundImageList, function(backgroundImage) {
     var left = 0;
 
     image.draw('image', 'Over', [left, top].join(','), '0,0', backgroundImage.src);
@@ -103,80 +110,77 @@ function createSpriteImage(option, backgroundImageList, backgroundNodeList, cb) 
     top += backgroundImage.height + margin;
   });
 
-  var imagePath = path.join(
-    path.dirname(this.srcAbsPath),
-    path.basename(this.srcPath, path.extname(this.srcPath)) + '-sprite.png'
-  );
-
-  //生成文件
-  image.toBuffer('PNG', function (err, buffer) {
+  // 生成文件
+  image.toBuffer('PNG', function(err, buffer) {
     if (err) {
-      return cb(err);
+      return callback(err);
     }
 
-    //创建模块并编译
-    this.createModule(
-      imagePath,
+    // 创建模块并编译
+    context.emitModule(
+      context.src + '.sprite.png',
       buffer,
-      function (err, spriteModule) {
-        cb(err, backgroundImageList, backgroundNodeList, spriteModule);
+      function(err, spriteModule) {
+        callback(err, backgroundImageList, backgroundNodeList, spriteModule);
       }
     );
-  }.bind(this));
+  });
 }
 
-function addSpriteImageProp(backgroundImageList, backgroundNodeList, spriteModule, cb) {
-  _.each(backgroundNodeList, function (backgroundNode, i) {
-    //添加注释
+function addSpriteImageProp(backgroundImageList, backgroundNodeList, spriteModule, callback) {
+  _.each(backgroundNodeList, function(backgroundNode, i) {
+    // 添加注释
     backgroundNode.append({
       text: '以下内容由 ' + pkg.name + ' 生成'
     });
 
-    //添加背景图链接
-    var url = spriteModule.url ||
-      mutil.relative(path.dirname(this.destAbsPath), spriteModule.destAbsPathWithHash);
-
+    // 添加背景图链接
     backgroundNode.append({
       prop: 'background-image',
-      value: 'url(' + url + ')'
+      value: 'url(' + spriteModule.url + ')'
     });
 
-    //添加背景图位置
+    // 添加背景图位置
     var offset = backgroundImageList[i].offset;
     backgroundNode.append({
       prop: 'background-position',
       value: [(-offset.left) + (offset.left ? 'px' : ''),
         (-offset.top) + (offset.top ? 'px' : '')].join(' ')
     });
-  }.bind(this));
+  });
 
-  cb();
+  callback();
 }
 
-function sprite(option, cb) {
-  var contents = this.contents.toString();
+module.exports = function(options, callback) {
+  var context = this;
+  var contents = context.contents.toString();
 
   if (!contents.trim()) {
-    return cb();
+    return callback();
   }
 
-  var root = postcss.parse(contents, {from: this.srcAbsPath});
+  var root = postcss.parse(contents, {from: path.resolve(context.context, context.src)});
 
   async.waterfall([
-    getBackgroundImageAndNodeList.bind(this, root, option),
-    createSpriteImage.bind(this),
-    addSpriteImageProp.bind(this)
-  ], function (err) {
+    getBackgroundImageAndNodeList.bind(context, root, options),
+    createSpriteImage.bind(context),
+    addSpriteImageProp.bind(context)
+  ], function(err) {
     if (err && err !== 'No need sprite') {
-      return cb(new mutil.PluginError(pkg.name, err, {
-        fileName: this.srcAbsPath,
-        showStack: true
-      }));
+      return callback(err);
     }
 
-    this.contents = new Buffer(root.toResult().css);
-    cb();
-  }.bind(this));
-}
+    try {
+      context.contents = new Buffer(root.toResult().css);
+    } catch (err) {
+      return callback(err);
+    }
 
-module.exports = mutil.plugin(pkg.name, pkg.version, sprite);
+    callback();
+  });
+};
+
+module.exports.toString = function() {
+  return [pkg.name, pkg.version].join('@');
+};

@@ -2,6 +2,8 @@
 
 > Miaow的CSS自动雪碧图工具
 
+## 效果示例
+
 ```css
 .bar {
   display: inline-block;
@@ -40,27 +42,5 @@
   /* 以下内容由 miaow-css-sprite 生成 */
   background-image: url(foo-sprite_567e004eac.png);
   background-position: 0 -84px;
-}
-```
-
-## 使用说明
-
-### 安装
-
-```
-npm install miaow-css-sprite --save-dev
-```
-
-### 在项目的 miaow.config.js 中添加模块的 tasks 设置
-
-```javascript
-//miaow.config.js
-module: {
-  tasks: [
-    {
-      test: /\.css$/,
-      plugins: ['miaow-css-sprite']
-    }
-  ]
 }
 ```

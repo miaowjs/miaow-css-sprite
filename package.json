@@ -1,7 +1,7 @@
 {
   "name": "miaow-css-sprite",
   "description": "Miaow的CSS自动雪碧图生成工具",
-  "version": "2.2.1",
+  "version": "3.0.0",
   "repository": "miaowjs/miaow-css-sprite",
   "author": {
     "name": "anhulife",
@@ -14,19 +14,20 @@
     "sprite"
   ],
   "dependencies": {
-    "async": "~0.9.0",
-    "gm": "~1.18.1",
-    "lodash": "~3.8.0",
-    "miaow-util": "~0.6.0",
-    "postcss": "~4.1.11"
+    "async": "~1.4.2",
+    "gm": "~1.20.0",
+    "lodash": "~3.10.1",
+    "postcss": "~5.0.1"
   },
   "devDependencies": {
-    "miaow": "^4.0.0",
-    "mocha": "^2.2.4"
+    "miaow": "/Users/anhulife/Source/personal/miaow",
+    "mocha": "^2.3.3",
+    "eslint": "^1.7.2",
+    "eslint-config-airbnb": "^0.1.0"
   },
   "scripts": {
     "postpublish": "cnpm sync miaow-css-sprite",
-    "test": "node ./node_modules/mocha/bin/mocha"
+    "test": "mocha"
   },
   "engines": {
     "node": ">=0.10"
