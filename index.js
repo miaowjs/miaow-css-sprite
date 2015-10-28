@@ -42,14 +42,12 @@ function getBackgroundImageAndNodeList(root, options, callback) {
     function(backgroundImage, callback) {
       async.series([
         function(callback) {
-          context.resolveModule(backgroundImage.src, function(err, backgroundModule) {
+          context.resolveFile(backgroundImage.src, function(err, file) {
             if (err) {
               return callback(err);
             }
 
-            context.addFileDependency(backgroundModule.src);
-
-            backgroundImage.src = path.resolve(context.context, backgroundModule.src);
+            backgroundImage.src = file;
             callback();
           });
         },
