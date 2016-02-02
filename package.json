@@ -1,7 +1,7 @@
 {
   "name": "miaow-css-sprite",
   "description": "Miaow的CSS自动雪碧图生成工具",
-  "version": "3.1.0",
+  "version": "3.2.0",
   "repository": "miaowjs/miaow-css-sprite",
   "author": {
     "name": "anhulife",
