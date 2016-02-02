@@ -1,6 +1,6 @@
 var _ = require('lodash');
 var async = require('async');
-var gm = require('gm');
+var images = require('images');
 var path = require('path');
 var postcss = require('postcss');
 
@@ -40,33 +40,29 @@ function getBackgroundImageAndNodeList(root, options, callback) {
   async.eachSeries(
     backgroundImageList,
     function(backgroundImage, callback) {
-      async.series([
-        function(callback) {
-          context.resolveModule(backgroundImage.src, function(err, module) {
-            if (err) {
-              return callback(err);
-            }
-
-            backgroundImage.src = path.resolve(module.context, module.src);
-            callback();
-          });
-        },
-
-        function(callback) {
-          gm(backgroundImage.src)
-            .identify(function(err, data) {
-              if (err) {
-                return callback(err);
-              }
-
-              backgroundImage.width = data.size.width;
-              backgroundImage.height = data.size.height;
-              backgroundImage.format = data.format;
-
-              callback();
-            });
+      context.resolveModule(backgroundImage.src, function(err, module) {
+        if (err) {
+          return callback(err);
         }
-      ], callback);
+
+        backgroundImage.src = path.resolve(module.context, module.src);
+
+        var image;
+        var size;
+
+        try {
+          image = images(backgroundImage.src);
+          size = image.size();
+        } catch(err) {
+          return callback(err);
+        }
+
+        backgroundImage.image = image;
+        backgroundImage.width = size.width;
+        backgroundImage.height = size.height;
+
+        callback();
+      });
     },
 
     function(err) {
@@ -90,7 +86,7 @@ function createSpriteImage(options, backgroundImageList, backgroundNodeList, cal
 
   height += margin * (backgroundImageList.length - 1);
 
-  var image = gm(width, height, 'none');
+  var image = images(width, height);
 
   var top = 0;
 
@@ -98,7 +94,7 @@ function createSpriteImage(options, backgroundImageList, backgroundNodeList, cal
   _.each(backgroundImageList, function(backgroundImage) {
     var left = 0;
 
-    image.draw('image', 'Over', [left, top].join(','), '0,0', backgroundImage.src);
+    image.draw(backgroundImage.image, left, top);
 
     backgroundImage.offset = {
       left: left,
@@ -109,20 +105,22 @@ function createSpriteImage(options, backgroundImageList, backgroundNodeList, cal
   });
 
   // 生成文件
-  image.toBuffer('PNG', function(err, buffer) {
-    if (err) {
-      return callback(err);
-    }
+  var buffer;
 
-    // 创建模块并编译
-    context.emitModule(
-      context.src + '.sprite.png',
-      buffer,
-      function(err, spriteModule) {
-        callback(err, backgroundImageList, backgroundNodeList, spriteModule);
-      }
-    );
-  });
+  try {
+    buffer = image.encode('PNG');
+  } catch(err) {
+    return callback(err);
+  }
+
+  // 创建模块并编译
+  context.emitModule(
+    context.src + '.sprite.png',
+    buffer,
+    function(err, spriteModule) {
+      callback(err, backgroundImageList, backgroundNodeList, spriteModule);
+    }
+  );
 }
 
 function addSpriteImageProp(backgroundImageList, backgroundNodeList, spriteModule, callback) {

@@ -33,6 +33,6 @@ describe('miaow-css-sprite', function() {
   });
 
   it('是否生成雪碧图', function() {
-    assert.equal(_.find(log.modules, {src: 'foo.css.sprite.png'}).destHash, 'abe24181c3881a749c269c77f1ed5cf6');
+    assert.equal(_.find(log.modules, {src: 'foo.css.sprite.png'}).destHash, 'ff91227a121458f3980671a245351f4b');
   });
 });
